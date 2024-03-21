@@ -35,7 +35,7 @@ public class Path {
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
-        // TODO:
+
         return new Path(graph, arcs);
     }
 
@@ -198,23 +198,31 @@ public class Path {
      * 
      * @return true if the path is valid, false otherwise.
      * 
-     * @deprecated Need to be implemented.
      */
     public boolean isValid() {
-        // TODO:
-        return false;
+        if (this.isEmpty()) return true;
+        if (this.size() == 1) return true;
+
+        if (this.arcs.get(0).getOrigin() != this.origin) {
+            return false;
+        }
+
+        for (int i = 0; i < this.arcs.size() - 1; i++) {
+            if (this.arcs.get(i).getDestination() != this.arcs.get(i + 1).getOrigin()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
      * Compute the length of this path (in meters).
      * 
      * @return Total length of the path (in meters).
-     * 
-     * @deprecated Need to be implemented.
      */
     public float getLength() {
-        // TODO:
-        return 0;
+        return this.arcs.stream().map(Arc::getLength).reduce(0.0f, Float::sum);
     }
 
     /**
@@ -224,12 +232,9 @@ public class Path {
      * 
      * @return Time (in seconds) required to travel this path at the given speed (in
      *         kilometers-per-hour).
-     * 
-     * @deprecated Need to be implemented.
      */
     public double getTravelTime(double speed) {
-        // TODO:
-        return 0;
+        return this.getLength() / (speed * 1000 / 3600);
     }
 
     /**
