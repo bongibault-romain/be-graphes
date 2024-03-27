@@ -253,7 +253,7 @@ public class Path {
      */
     public boolean isValid() {
         if (this.isEmpty()) return true;
-        if (this.size() == 1) return true;
+        if (this.arcs.isEmpty()) return true;
 
         if (this.arcs.get(0).getOrigin() != this.origin) {
             return false;
