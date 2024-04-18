@@ -18,15 +18,20 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
     @Override
     protected ShortestPathSolution doRun() {
         final ShortestPathData data = getInputData();
-        ShortestPathSolution solution = null;
+        ShortestPathSolution solution;
 
         // Initialize the origin label
         Node origin = data.getOrigin();
 
+        // TODO: BELLMAN-FORD donne INFEASIBLE quand l'origine est égale à la destination c'est pas normal ?
+        if (origin == data.getDestination()) {
+            return new ShortestPathSolution(data, AbstractSolution.Status.INFEASIBLE, null);
+        }
+
         Map<Node, Label> labels = new HashMap<>();
 
         // Insert origin in labels;
-        labels.put(origin, new Label(origin, false, 0, null));
+        labels.put(origin, this.createLabel(origin, 0, null));
 
         // Initialize the heap
         PriorityQueue<Label> heap = new BinaryHeap<>();
@@ -61,11 +66,11 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 double oldDistance = Double.POSITIVE_INFINITY;
 
                 if (destinationLabel != null) {
-                    oldDistance = destinationLabel.getRealCost();
+                    oldDistance = destinationLabel.getOriginCost();
                 }
 
                 double cost = data.getCost(successorArc);
-                double newDistance = labels.get(node).getRealCost() + cost;
+                double newDistance = labels.get(node).getOriginCost() + cost;
 
                 this.notifyNodeReached(successorArc.getDestination());
 
@@ -74,7 +79,11 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 }
 
                 if (newDistance < oldDistance) {
-                    Label newDestinationLabel = new Label(successorArc.getDestination(), false, newDistance, node);
+                    Label newDestinationLabel = this.createLabel(
+                            successorArc.getDestination(),
+                            newDistance,
+                            node
+                    );
 
                     labels.put(
                             successorArc.getDestination(),
@@ -125,6 +134,10 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         }
 
         return solution;
+    }
+
+    public Label createLabel(Node node, double cost, Node parent) {
+        return new Label(node, false, cost, parent);
     }
 
 }

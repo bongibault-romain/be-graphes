@@ -10,6 +10,9 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.insa.graphs.algorithm.ArcInspectorFactory;
+import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
 import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
 import org.insa.graphs.model.Graph;
@@ -58,23 +61,14 @@ public class Launch {
         // TODO: Read the graph.
         final Graph graph = reader.read();
 
-        // Create the drawing:
-        final Drawing drawing = createDrawing();
+        DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(new ShortestPathData(
+                graph,
+                graph.get(479),
+                graph.get(479),
+                ArcInspectorFactory.getAllFilters().get(0)
+        ));
 
-        // TODO: Draw the graph on the drawing.
-        drawing.drawGraph(graph);
-
-        // TODO: Create a PathReader.
-        final PathReader pathReader = new BinaryPathReader(
-                new DataInputStream(new BufferedInputStream(new FileInputStream(pathName)))
-        );
-
-        // TODO: Read the path.
-        final Path path = pathReader.readPath(graph);
-
-        // TODO: Draw the path.
-        drawing.drawPath(path);
-
+        dijkstra.run();
     }
 
 }

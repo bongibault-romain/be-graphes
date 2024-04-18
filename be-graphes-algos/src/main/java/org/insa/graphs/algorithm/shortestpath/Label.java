@@ -8,14 +8,14 @@ public class Label implements Comparable<Label> {
 
     private boolean marked;
 
-    private final double realCost;
+    private final double originCost;
 
     private final Node father;
 
-    public Label(Node current, boolean marked, double realCost, Node father) {
+    public Label(Node current, boolean marked, double originCost, Node father) {
         this.current = current;
         this.marked = marked;
-        this.realCost = realCost;
+        this.originCost = originCost;
         this.father = father;
     }
 
@@ -31,8 +31,12 @@ public class Label implements Comparable<Label> {
         this.marked = marked;
     }
 
-    public double getRealCost() {
-        return realCost;
+    public double getOriginCost() {
+        return originCost;
+    }
+
+    public double getTotalCost() {
+        return originCost;
     }
 
     public Node getParent() {
@@ -41,6 +45,6 @@ public class Label implements Comparable<Label> {
 
     @Override
     public int compareTo(Label o) {
-        return Double.compare(this.realCost, o.getRealCost());
+        return Double.compare(this.getTotalCost(), o.getTotalCost());
     }
 }
