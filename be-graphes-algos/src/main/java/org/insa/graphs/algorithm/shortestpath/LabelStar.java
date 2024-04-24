@@ -5,22 +5,21 @@ import org.insa.graphs.model.Node;
 
 public class LabelStar extends Label {
 
-    private final Node destination;
+    private final ShortestPathData data;
 
-    private final AbstractInputData.Mode mode;
-
-    public LabelStar(Node current, boolean marked, double realCost, Node father, Node destination, AbstractInputData.Mode mode) {
+    public LabelStar(Node current, boolean marked, double realCost, Node father, ShortestPathData data) {
         super(current, marked, realCost, father);
-        this.destination = destination;
-        this.mode = mode;
+        this.data = data;
     }
 
     @Override
     public double getTotalCost() {
-        if (this.mode == AbstractInputData.Mode.LENGTH) {
-            return this.getOriginCost() + this.getNode().getPoint().distanceTo(this.destination.getPoint());
+        if (this.data.getMode() == AbstractInputData.Mode.LENGTH) {
+            return this.getOriginCost() + this.getNode().getPoint().distanceTo(this.data.getDestination().getPoint());
         }
 
-        return this.getOriginCost();
+        double speed = this.data.getGraph().getGraphInformation().getMaximumSpeed() / 3.6;
+
+        return this.getOriginCost() + this.getNode().getPoint().distanceTo(this.data.getDestination().getPoint()) / speed;
     }
 }

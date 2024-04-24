@@ -10,6 +10,6 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
 
     @Override
     public Label createLabel(Node node, double cost, Node parent) {
-        return new LabelStar(node, false, cost, parent, this.getInputData().getDestination(), this.data.getMode());
+        return new LabelStar(node, false, cost, parent, this.getInputData());
     }
 }
