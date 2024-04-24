@@ -39,16 +39,14 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         // Insert the origin in the heap
         heap.insert(labels.get(origin));
 
+        this.notifyOriginProcessed(origin);
+
         while ((!labels.containsKey(data.getDestination())
                 || !labels.get(data.getDestination()).isMarked())
                 && !heap.isEmpty()) {
             Label label = heap.deleteMin();
             Node node = label.getNode();
             label.setMarked(true);
-
-            if (node == data.getOrigin()) {
-                this.notifyOriginProcessed(node);
-            }
 
             this.notifyNodeMarked(node);
 
