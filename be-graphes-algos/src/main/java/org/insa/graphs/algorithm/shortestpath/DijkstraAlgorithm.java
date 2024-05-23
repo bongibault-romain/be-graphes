@@ -30,6 +30,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
         Map<Node, Label> labels = new HashMap<>();
 
+
         // Insert origin in labels;
         labels.put(origin, this.createLabel(origin, 0, null));
 
@@ -41,9 +42,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
         this.notifyOriginProcessed(origin);
 
-        while ((!labels.containsKey(data.getDestination())
-                || !labels.get(data.getDestination()).isMarked())
-                && !heap.isEmpty()) {
+        while (this.shouldContinue(labels, heap, data)) {
             Label label = heap.deleteMin();
             Node node = label.getNode();
             label.setMarked(true);
@@ -132,6 +131,12 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         }
 
         return solution;
+    }
+
+    protected boolean shouldContinue(Map<Node, Label> labels, PriorityQueue<Label> heap, ShortestPathData data) {
+        return (!labels.containsKey(data.getDestination())
+                || !labels.get(data.getDestination()).isMarked())
+                && !heap.isEmpty();
     }
 
     public Label createLabel(Node node, double cost, Node parent) {

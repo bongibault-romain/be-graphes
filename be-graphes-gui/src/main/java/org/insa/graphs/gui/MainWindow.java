@@ -46,6 +46,10 @@ import javax.swing.border.EmptyBorder;
 import org.insa.graphs.algorithm.AbstractSolution;
 import org.insa.graphs.algorithm.AlgorithmFactory;
 import org.insa.graphs.algorithm.carpooling.CarPoolingAlgorithm;
+import org.insa.graphs.algorithm.confinedwalks.ConfinedWalksAlgorithm;
+import org.insa.graphs.algorithm.confinedwalks.ConfinedWalksData;
+import org.insa.graphs.algorithm.confinedwalks.ConfinedWalksSolution;
+import org.insa.graphs.algorithm.confinedwalks.ConfinedWalksTextObserver;
 import org.insa.graphs.algorithm.packageswitch.PackageSwitchAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
@@ -61,6 +65,7 @@ import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.GraphPalette;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
 import org.insa.graphs.gui.drawing.components.MapViewDrawing;
+import org.insa.graphs.gui.observers.ConfinedWalksGraphicObserver;
 import org.insa.graphs.gui.observers.ShortestPathGraphicObserver;
 import org.insa.graphs.gui.observers.WeaklyConnectedComponentGraphicObserver;
 import org.insa.graphs.gui.utils.FileUtils;
@@ -108,7 +113,7 @@ public class MainWindow extends JFrame {
 
     // Algorithm panels
     private final List<AlgorithmPanel> algoPanels = new ArrayList<>();
-    private final AlgorithmPanel wccPanel, spPanel, cpPanel, psPanel;
+    private final AlgorithmPanel wccPanel, spPanel, cpPanel, psPanel, swPanel;
 
     // Path panel
     private final PathsPanel pathPanel;
@@ -261,11 +266,72 @@ public class MainWindow extends JFrame {
         psPanel = new AlgorithmPanel(this, PackageSwitchAlgorithm.class, "Car-Pooling",
                 new String[] { "Oribin A", "Origin B", "Destination A", "Destination B" }, true);
 
+        swPanel = new AlgorithmPanel(this, ConfinedWalksAlgorithm.class, "Confined-Walks", new String[] {
+                "Center", "Inner Radius", "Outer Radius" }, true);
+
+        swPanel.addStartActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StartActionEvent evt = (StartActionEvent) e;
+                ConfinedWalksData data = new ConfinedWalksData(
+                        graph,
+                        evt.getArcFilter(),
+                        evt.getNodes().get(0),
+                        evt.getNodes().get(0).getPoint().distanceTo(evt.getNodes().get(1).getPoint()),
+                        evt.getNodes().get(0).getPoint().distanceTo(evt.getNodes().get(2).getPoint())
+                );
+
+                ConfinedWalksAlgorithm spAlgorithm = null;
+                try {
+                    spAlgorithm = (ConfinedWalksAlgorithm) AlgorithmFactory
+                            .createAlgorithm(evt.getAlgorithmClass(), data);
+                }
+                catch (Exception e1) {
+                    JOptionPane.showMessageDialog(MainWindow.this,
+                            "An error occurred while creating the specified algorithm.",
+                            "Internal error: Algorithm instantiation failure",
+                            JOptionPane.ERROR_MESSAGE);
+                    e1.printStackTrace();
+                    return;
+                }
+
+                swPanel.setEnabled(false);
+
+                if (evt.isGraphicVisualizationEnabled()) {
+                    spAlgorithm.addObserver(new ConfinedWalksGraphicObserver(drawing));
+                }
+                if (evt.isTextualVisualizationEnabled()) {
+                    spAlgorithm.addObserver(new ConfinedWalksTextObserver(printStream));
+                }
+
+                final ConfinedWalksAlgorithm copyAlgorithm = spAlgorithm;
+                launchThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Run the algorithm.
+                        ConfinedWalksSolution solution = copyAlgorithm.run();
+                        // Add the solution to the solution panel (but do not display
+                        // overlay).
+                        swPanel.solutionPanel.addSolution(solution, false);
+                        // If the solution is feasible, add the path to the path panel.
+                        if (solution.isFeasible()) {
+                            pathPanel.addPath(solution.getPath());
+                        }
+                        // Show the solution panel and enable the shortest-path panel.
+                        swPanel.solutionPanel.setVisible(true);
+                        swPanel.setEnabled(true);
+                    }
+                });
+            }
+        });
+
+
         // add algorithm panels
         algoPanels.add(wccPanel);
         algoPanels.add(spPanel);
         algoPanels.add(cpPanel);
         algoPanels.add(psPanel);
+        algoPanels.add(swPanel);
 
         this.pathPanel = new PathsPanel(this);
 
@@ -764,16 +830,27 @@ public class MainWindow extends JFrame {
             }
         }));
 
+        JMenuItem swItem = new JMenuItem("Confined Walks");
+        swItem.addActionListener(baf.createBlockingAction(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                enableAlgorithmPanel(swPanel);
+            }
+        }));
+
         graphLockItems.add(wccItem);
         graphLockItems.add(spItem);
         graphLockItems.add(cpItem);
         graphLockItems.add(psItem);
+        graphLockItems.add(swItem);
 
         algoMenu.add(wccItem);
         algoMenu.addSeparator();
         algoMenu.add(spItem);
         algoMenu.add(cpItem);
         algoMenu.add(psItem);
+        algoMenu.addSeparator();
+        algoMenu.add(swItem);
 
         // Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
