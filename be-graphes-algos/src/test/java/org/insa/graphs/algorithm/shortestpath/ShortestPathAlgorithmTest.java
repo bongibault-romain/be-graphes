@@ -118,7 +118,7 @@ public abstract class ShortestPathAlgorithmTest {
         this.solution = this.algorithm.run();
     }
 
-    private ShortestPathSolution solution;
+    public ShortestPathSolution solution;
 
     public ShortestPathAlgorithm algorithm;
 
