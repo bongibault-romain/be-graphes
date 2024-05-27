@@ -21,12 +21,12 @@ public class ConfinedWalksData extends AbstractInputData {
      * @param graph        Graph for this input data.
      * @param arcInspector Arc inspector for this input data.
      */
-    public ConfinedWalksData(Graph graph, ArcInspector arcInspector, Node center, double innerRadius, double outerRadius) {
+    public ConfinedWalksData(Graph graph, ArcInspector arcInspector, Node center, double innerRadius, double outerRadius, Node startNode) {
         super(graph, arcInspector);
         this.center = center;
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
-        this.startNode = this.calculateStartNode();
+        this.startNode = startNode;
     }
 
     private Node calculateStartNode() {

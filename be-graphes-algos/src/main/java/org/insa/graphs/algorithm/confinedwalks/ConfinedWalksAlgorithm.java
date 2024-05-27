@@ -5,13 +5,14 @@ import org.insa.graphs.algorithm.AbstractSolution;
 import org.insa.graphs.algorithm.shortestpath.*;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.algorithm.utils.PriorityQueue;
+import org.insa.graphs.algorithm.utils.Vector2D;
 import org.insa.graphs.model.Arc;
 import org.insa.graphs.model.Node;
+import org.insa.graphs.model.Path;
 import org.insa.graphs.model.Point;
 
 import javax.crypto.Cipher;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ConfinedWalksAlgorithm extends AbstractAlgorithm<ConfinedWalksObserver> {
     protected ConfinedWalksAlgorithm(ConfinedWalksData data) {
@@ -65,6 +66,8 @@ public class ConfinedWalksAlgorithm extends AbstractAlgorithm<ConfinedWalksObser
                     heap.insert(successorLabel);
                 }
 
+                System.out.println("Successor: " + successor.getId() + " Angle: " + label.getAngle() + " Distance: " + label.getDistance() + " Cost: " + data.getCost(arc));
+
                 if (successor == startNode && label.getAngle() >= Math.PI) {
                     ConfinedLabel newSuccessorLabel = this.createLabel(successor, label.getDistance() + data.getCost(arc), node);
                     labels.put(successor, newSuccessorLabel);
@@ -86,13 +89,38 @@ public class ConfinedWalksAlgorithm extends AbstractAlgorithm<ConfinedWalksObser
 
         }
 
+
+        if (labels.get(startNode).getParent() != null) {
+            ArrayList<Arc> arcs = new ArrayList<>();
+            Node currentNode = startNode;
+
+            while (labels.get(currentNode).getParent() != null) {
+                Node parent = labels.get(currentNode).getParent();
+
+                for (Arc arc : parent.getSuccessors()) {
+                    if (arc.getDestination() == currentNode) {
+                        arcs.add(arc);
+                        break;
+                    }
+                }
+
+                currentNode = parent;
+            }
+
+            Path path = new Path(data.getGraph(), arcs);
+
+            return new ConfinedWalksSolution(data, AbstractSolution.Status.OPTIMAL, path);
+        }
+
         return new ConfinedWalksSolution(data, AbstractSolution.Status.INFEASIBLE, null);
     }
 
     protected boolean shouldContinue(PriorityQueue<ConfinedLabel> heap, Map<Node, ConfinedLabel> labels) {
         Node startNode = this.getInputData().getStartNode();
 
-        return !heap.isEmpty() && labels.get(startNode).getParent() == null && heap.findMin().getAngle() >= Math.PI;
+        return (!heap.isEmpty()
+                && labels.get(startNode).getParent() != null)
+                || (!heap.isEmpty() && heap.findMin().getAngle() < Math.PI);
     }
 
     protected ConfinedLabel createLabel(Node node, double distance, Node parent) {
@@ -110,14 +138,20 @@ public class ConfinedWalksAlgorithm extends AbstractAlgorithm<ConfinedWalksObser
      */
     private double calculateAngle(Node node) {
         Point C = this.getInputData().getCenter().getPoint();
-        Point A = this.getInputData().getStartNode().getPoint();
-        Point B = node.getPoint();
+        Point S = this.getInputData().getStartNode().getPoint();
+        Point N = node.getPoint();
 
-        double a = B.distanceTo(C);
-        double b = A.distanceTo(C);
-        double c = A.distanceTo(B);
+        Vector2D OS = new Vector2D(
+                S.getLongitude() - C.getLongitude(),
+                S.getLatitude() - C.getLatitude()
+        );
 
-        return Math.acos((Math.cos(c) - Math.cos(a) * Math.cos(b)) / (Math.sin(a) * Math.sin(b)));
+        Vector2D ON = new Vector2D(
+                N.getLongitude() - C.getLongitude(),
+                N.getLatitude() - C.getLatitude()
+        );
+
+        return OS.angle(ON);
     }
 
     @Override

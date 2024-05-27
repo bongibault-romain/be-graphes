@@ -267,7 +267,7 @@ public class MainWindow extends JFrame {
                 new String[] { "Oribin A", "Origin B", "Destination A", "Destination B" }, true);
 
         swPanel = new AlgorithmPanel(this, ConfinedWalksAlgorithm.class, "Confined-Walks", new String[] {
-                "Center", "Inner Radius", "Outer Radius" }, true);
+                "Center", "Inner Radius", "Outer Radius", "Starting" }, true);
 
         swPanel.addStartActionListener(new ActionListener() {
             @Override
@@ -278,7 +278,8 @@ public class MainWindow extends JFrame {
                         evt.getArcFilter(),
                         evt.getNodes().get(0),
                         evt.getNodes().get(0).getPoint().distanceTo(evt.getNodes().get(1).getPoint()),
-                        evt.getNodes().get(0).getPoint().distanceTo(evt.getNodes().get(2).getPoint())
+                        evt.getNodes().get(0).getPoint().distanceTo(evt.getNodes().get(2).getPoint()),
+                        evt.getNodes().get(3)
                 );
 
                 ConfinedWalksAlgorithm spAlgorithm = null;
