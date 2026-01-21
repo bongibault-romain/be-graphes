@@ -40,8 +40,8 @@ public abstract class ShortestPathAlgorithmTest {
         Collection<Object> data = new ArrayList<>();
 
         // TODO: change maps URL
-        final Graph insa = read("D:/projects/be-graphes/maps/insa.mapgr");
-        final Graph belgium = read("D:/projects/be-graphes/maps/belgium.mapgr");
+        final Graph insa = read("./../maps/insa.mapgr");
+        final Graph belgium = read("./../maps/belgium.mapgr");
 
         // Chemin normal à l'INSA (filters[0] = shortest all roads allowed)
         data.add(new ShortestPathData(
